@@ -4,14 +4,18 @@ pygame.init()
 class Consts:
     HEIGHT = 800
     WIDTH = 1000
-    CARD_HEIGHT = 100
-    CARD_WIDTH = 60
+    CARD_HEIGHT = 120
+    CARD_WIDTH = 80
     LOGO_HEIGHT = 300
     LOGO_WIDTH = 400
 
 class Colours:
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
+    RED = (255, 0, 0)
+    GREEN = (0, 255, 0)
+    BlUE = (0, 0, 255)
+    YELLOW = (0, 255, 255)
 
 class Images:
     pygame.display.set_mode((Consts.WIDTH, Consts.HEIGHT))
