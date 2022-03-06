@@ -8,15 +8,15 @@ HEIGHT = Consts.HEIGHT
 WIDTH = Consts.WIDTH
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("ONU")
-pygame.display.set_icon(Images.logo)
+pygame.display.set_icon(Images.LOGO)
 
 deck = []
 discard = []
 
 for colour in ("R", "B", "G", "Y"):
-    discard.insert(0, Card(colour, 0))
+    discard.insert(0, Card(colour, "0"))
     for i in range(2):
-        for value in range(1, 10):
+        for value in map(str, range(1, 10)):
             discard.append(Card(colour, value))
 
 
@@ -52,7 +52,7 @@ def draw_title():
     screen.blit(txt, txt_rect)
 
     logo_pos = ((WIDTH - Consts.LOGO_WIDTH) / 2, (HEIGHT - Consts.LOGO_HEIGHT) / 2)
-    screen.blit(Images.logo, logo_pos)
+    screen.blit(Images.LOGO, logo_pos)
 
 
 def draw_game():
@@ -68,17 +68,17 @@ def draw_game():
 
     player.draw_hand(screen)
 
-    txt = Fonts.title_font.render(str(len(bot1.hand)), True, Colours.BLACK)
+    txt = Fonts.title_font.render(str(len(bot1.hand)), True, Colours.WHITE)
     txt_width, txt_height = Fonts.title_font.size(str(len(bot1.hand)))
     txt_rect = txt.get_rect(center=(WIDTH - txt_width, HEIGHT / 2))
     screen.blit(txt, txt_rect)
 
-    txt = Fonts.title_font.render(str(len(bot2.hand)), True, Colours.BLACK)
+    txt = Fonts.title_font.render(str(len(bot2.hand)), True, Colours.WHITE)
     txt_width, txt_height = Fonts.title_font.size(str(len(bot2.hand)))
     txt_rect = txt.get_rect(center=(WIDTH / 2, txt_height))
     screen.blit(txt, txt_rect)
 
-    txt = Fonts.title_font.render(str(len(bot3.hand)), True, Colours.BLACK)
+    txt = Fonts.title_font.render(str(len(bot3.hand)), True, Colours.WHITE)
     txt_width, txt_height = Fonts.title_font.size(str(len(bot3.hand)))
     txt_rect = txt.get_rect(center=(txt_width, HEIGHT / 2))
     screen.blit(txt, txt_rect)
@@ -109,7 +109,7 @@ while run:
     if timer > 0:
         timer -= 1
     pygame.display.update()
-    screen.fill(Colours.WHITE)
+    screen.blit(Images.BACKGROUND, (0, 0))
     clock.tick(60)
     keys = pygame.key.get_pressed()
     events = pygame.event.get()
@@ -147,7 +147,12 @@ while run:
                     player.draw_card(deck)
                     timer = 45
                 else:
+                    bordered = False
                     for i, card in enumerate(reversed(player.hand)):
+                        if card.hovered(mouse_pos) and not bordered:
+                            border = pygame.Rect(card.x, card.y, Consts.CARD_WIDTH, Consts.CARD_HEIGHT)
+                            pygame.draw.rect(screen, Colours.BLACK, border, 3, 6)
+                            bordered = True
                         if valid(card) and card.hovered(mouse_pos) and mouse_pressed[0]:
                             player.play_card(discard, -(i + 1))
                             turn = 1
