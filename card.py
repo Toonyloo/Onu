@@ -17,5 +17,6 @@ class Card:
     def draw(self, surf, pos):
         surf.blit(self.surf, pos)
     
+    
     def __repr__(self):
         return f"({self.colour}, {self.value})"

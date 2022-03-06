@@ -3,7 +3,7 @@ import random
 from constants import Consts, Fonts, Colours, Images
 from collections import deque
 from card import Card
-from players import Player, BotPlayer
+from players import Player
 
 HEIGHT = Consts.HEIGHT
 WIDTH = Consts.WIDTH
@@ -20,16 +20,17 @@ for colour in ("R", "B", "G", "Y"):
         for value in range(1, 10):
             discard.append(Card(colour, value))
 
+def valid(card):
+    colour = card.colour == discard[0].colour
+    value = card.value == discard[0].value
+    return colour or value
+
 def reshuffle():
     top = discard.popleft()
     random.shuffle(discard)
     while (len(discard) > 0):
         deck.append(discard.popleft())
     discard.appendleft(top)
-
-run = True
-game_state = 0
-clock = pygame.time.Clock()
 
 def draw_title():
     txt = Fonts.title_font.render("Welcome to...", True, Colours.BLACK)
@@ -48,7 +49,7 @@ def draw_title():
     screen.blit(Images.logo, logo_pos)
 
 def draw_game():
-    top_card = deck[0] 
+    top_card = discard[0] 
     card_pos = ((WIDTH - Consts.CARD_WIDTH) / 2, (HEIGHT - Consts.CARD_HEIGHT) / 2)
     top_card.draw(screen, card_pos)
     
@@ -76,6 +77,11 @@ def draw_game():
     txt_rect = txt.get_rect(center=(txt_width, HEIGHT / 2))
     screen.blit(txt, txt_rect)
 
+run = True
+game_state = 0
+turn = 0
+clock = pygame.time.Clock()
+
 while run:
     pygame.display.update()
     screen.fill(Colours.WHITE)
@@ -93,9 +99,9 @@ while run:
         if True in keys or True in mouse_pressed:
             reshuffle()
             player = Player()
-            bot1 = BotPlayer()
-            bot2 = BotPlayer()
-            bot3 = BotPlayer()
+            bot1 = Player()
+            bot2 = Player()
+            bot3 = Player()
             for p in (player, bot1, bot2, bot3):
                 for i in range(7):
                     p.draw_card(deck)
@@ -103,4 +109,28 @@ while run:
     
     if game_state == 1:
         if len(deck) < 3: reshuffle()
+        if turn == 0:
+            for i, k in enumerate((pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5, pygame.K_6, pygame.K_7)):
+                if len(player.hand) > i and keys[k] and valid(player.hand[i]):
+                    player.play_card(discard, i)
+                    turn = 1
+                    break
+        if turn == 1:
+            for i, card in enumerate(bot1.hand):
+                if valid(card):
+                    bot1.play_card(discard, i)
+                    turn = 2
+                    break
+        if turn == 2:
+            for i, card in enumerate(bot2.hand):
+                if valid(card):
+                    bot2.play_card(discard, i)
+                    turn = 3
+                    break
+        if turn == 3:
+            for i, card in enumerate(bot3.hand):
+                if valid(card):
+                    bot3.play_card(discard, i)
+                    turn = 0
+                    break
         draw_game()
