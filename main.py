@@ -43,8 +43,12 @@ def draw_title():
     txt_rect = txt.get_rect(center=(WIDTH / 2, HEIGHT - 200))
     screen.blit(txt, txt_rect)
 
-    txt = Fonts.title_font.render("Press Anything to Play", True, Colours.BLACK)
+    txt = Fonts.title_font.render("Play", True, Colours.BLACK)
     txt_rect = txt.get_rect(center=(WIDTH / 2, HEIGHT - 100))
+    button_rect = txt.get_rect(size=(200, 100), center=(WIDTH / 2, HEIGHT - 100))
+    if button_hovered: pygame.draw.rect(screen, Colours.LIGHT_RED, button_rect, 0, 8)
+    else: pygame.draw.rect(screen, Colours.RED, button_rect, 0, 8)
+    pygame.draw.rect(screen, Colours.BLACK, button_rect, 5, 8)
     screen.blit(txt, txt_rect)
 
     logo_pos = ((WIDTH - Consts.LOGO_WIDTH) / 2, (HEIGHT - Consts.LOGO_HEIGHT) / 2)
@@ -80,10 +84,25 @@ def draw_game():
     screen.blit(txt, txt_rect)
 
 
+def draw_gameover():
+    txt = Fonts.title_font.render("Game Over!", True, Colours.BLACK)
+    txt_rect = txt.get_rect(center=(WIDTH / 2, HEIGHT / 4))
+    screen.blit(txt, txt_rect)
+    
+    txt = Fonts.title_font.render("Back to Title", True, Colours.BLACK)
+    txt_rect = txt.get_rect(center=(WIDTH / 2, HEIGHT - 100))
+    button_rect = txt.get_rect(size=(300, 100), center=(WIDTH / 2, HEIGHT - 100))
+    if button_hovered: pygame.draw.rect(screen, Colours.LIGHT_RED, button_rect, 0, 8)
+    else: pygame.draw.rect(screen, Colours.RED, button_rect, 0, 8)
+    pygame.draw.rect(screen, Colours.BLACK, button_rect, 5, 8)
+    screen.blit(txt, txt_rect)
+
 run = True
 game_state = 0
 turn = 0
 timer = 0
+winner = None
+button_hovered = False
 clock = pygame.time.Clock()
 
 while run:
@@ -102,21 +121,26 @@ while run:
 
     if game_state == 0:
         draw_title()
-        if True in keys or True in mouse_pressed:
-            reshuffle()
-            player = HumanPlayer()
-            bot1 = BotPlayer()
-            bot2 = BotPlayer()
-            bot3 = BotPlayer()
-            for p in (player, bot1, bot2, bot3):
-                for i in range(7):
-                    p.draw_card(deck)
-            game_state = 1
+        
+        if timer == 0:
+            button_hovered = abs(WIDTH / 2 - mouse_pos[0]) < 100 and abs(HEIGHT - 100 - mouse_pos[1]) < 50
+            if mouse_pressed[0] and button_hovered:
+                reshuffle()
+                player = HumanPlayer()
+                bot1 = BotPlayer()
+                bot2 = BotPlayer()
+                bot3 = BotPlayer()
+                for p in (player, bot1, bot2, bot3):
+                    for i in range(7):
+                        p.draw_card(deck)
+                game_state = 1
+                timer = 120
 
     if game_state == 1:
         draw_game()
         if len(deck) < 3: 
             reshuffle()
+
         if timer == 0:
             if turn == 0:
                 if True not in map(valid, player.hand):
@@ -132,7 +156,7 @@ while run:
             elif turn == 1:
                 if True not in map(valid, bot1.hand):
                     bot1.draw_card(deck)
-                    timer = 45
+                    timer = 30
                 else:
                     for i, card in enumerate(bot1.hand):
                         if valid(card):
@@ -143,7 +167,7 @@ while run:
             elif turn == 2:
                 if True not in map(valid, bot2.hand):
                     bot2.draw_card(deck)
-                    timer = 45
+                    timer = 30
                 else:
                     for i, card in enumerate(bot2.hand):
                         if valid(card):
@@ -154,7 +178,7 @@ while run:
             elif turn == 3:
                 if True not in map(valid, bot3.hand):
                     bot3.draw_card(deck)
-                    timer = 45
+                    timer = 30
                 else:
                     for i, card in enumerate(bot3.hand):
                         if valid(card):
@@ -162,3 +186,20 @@ while run:
                             turn = 0
                             timer = 90
                             break
+
+        for p in (player, bot1, bot2, bot3):
+            if len(p.hand) == 0:
+                winner = p
+                game_state = 2
+                timer = 120
+
+
+    if game_state == 2:
+        button_hovered = abs(WIDTH / 2 - mouse_pos[0]) < 150 and abs(HEIGHT - 100 - mouse_pos[1]) < 50
+        draw_gameover()
+        
+        if timer == 0:
+            button_hovered = abs(WIDTH / 2 - mouse_pos[0]) < 150 and abs(HEIGHT - 100 - mouse_pos[1]) < 50
+            if button_hovered and mouse_pressed[0]:
+                game_state = 0
+                timer = 120
