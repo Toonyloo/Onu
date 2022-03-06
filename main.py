@@ -80,9 +80,12 @@ def draw_game():
 run = True
 game_state = 0
 turn = 0
+timer = 0
 clock = pygame.time.Clock()
 
 while run:
+    if timer > 0: timer -= 1
+    print(timer)
     pygame.display.update()
     screen.fill(Colours.WHITE)
     clock.tick(60)
@@ -108,29 +111,50 @@ while run:
             game_state = 1
     
     if game_state == 1:
-        if len(deck) < 3: reshuffle()
-        if turn == 0:
-            for i, k in enumerate((pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5, pygame.K_6, pygame.K_7)):
-                if len(player.hand) > i and keys[k] and valid(player.hand[i]):
-                    player.play_card(discard, i)
-                    turn = 1
-                    break
-        if turn == 1:
-            for i, card in enumerate(bot1.hand):
-                if valid(card):
-                    bot1.play_card(discard, i)
-                    turn = 2
-                    break
-        if turn == 2:
-            for i, card in enumerate(bot2.hand):
-                if valid(card):
-                    bot2.play_card(discard, i)
-                    turn = 3
-                    break
-        if turn == 3:
-            for i, card in enumerate(bot3.hand):
-                if valid(card):
-                    bot3.play_card(discard, i)
-                    turn = 0
-                    break
         draw_game()
+        if len(deck) < 3: reshuffle()
+        if timer == 0:
+            if turn == 0:
+                if True not in map(valid, player.hand):
+                    player.draw_card(deck)
+                    timer = 30
+                else:
+                    for i, k in enumerate((pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5, pygame.K_6, pygame.K_7, pygame.K_8, pygame.K_9)):
+                        if len(player.hand) > i and keys[k] and valid(player.hand[i]):
+                            player.play_card(discard, i)
+                            turn = 1
+                            timer = 60
+                            break
+            if turn == 1:
+                if True not in map(valid, bot1.hand):
+                    bot1.draw_card(deck)
+                    timer = 30
+                else:
+                    for i, card in enumerate(bot1.hand):
+                        if valid(card):
+                            bot1.play_card(discard, i)
+                            turn = 2
+                            timer = 60
+                            break
+            if turn == 2:
+                if True not in map(valid, bot2.hand):
+                    bot2.draw_card(deck)
+                    timer = 30
+                else:
+                    for i, card in enumerate(bot2.hand):
+                        if valid(card):
+                            bot2.play_card(discard, i)
+                            turn = 3
+                            timer = 60
+                            break
+            if turn == 3:
+                if True not in map(valid, bot3.hand):
+                    bot3.draw_card(deck)
+                    timer = 30
+                else:
+                    for i, card in enumerate(bot3.hand):
+                        if valid(card):
+                            bot3.play_card(discard, i)
+                            turn = 0
+                            timer = 60
+                            break
