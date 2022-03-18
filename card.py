@@ -1,5 +1,5 @@
 import pygame
-from constants import Consts, Fonts, Colours, Images
+from constants import Consts, Images
 pygame.init()
 
 

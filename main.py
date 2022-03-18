@@ -23,10 +23,11 @@ for _ in range(4):
     for value in "W", "D":
         discard.append(Card("W", value))
 
+
 def valid(card):
     colour = card.colour == discard[0].colour or card.colour == "W"
     value = card.value == discard[0].value
-    return colour or value 
+    return colour or value
 
 
 def reshuffle():
@@ -38,19 +39,21 @@ def reshuffle():
 
 
 def draw_title():
-    txt = Fonts.title_font.render("Welcome to...", True, Colours.BLACK)
+    txt = Fonts.TITLE_FONT.render("Welcome to...", True, Colours.BLACK)
     txt_rect = txt.get_rect(center=(WIDTH / 2, 100))
     screen.blit(txt, txt_rect)
 
-    txt = Fonts.font.render("(definitely not an Uno ripoff)", True, Colours.BLACK)
+    txt = Fonts.FONT.render("(definitely not an Uno ripoff)", True, Colours.BLACK)
     txt_rect = txt.get_rect(center=(WIDTH / 2, HEIGHT - 200))
     screen.blit(txt, txt_rect)
 
-    txt = Fonts.title_font.render("Play", True, Colours.BLACK)
+    txt = Fonts.TITLE_FONT.render("Play", True, Colours.BLACK)
     txt_rect = txt.get_rect(center=(WIDTH / 2, HEIGHT - 100))
     button_rect = txt.get_rect(size=(200, 100), center=(WIDTH / 2, HEIGHT - 100))
-    if button_hovered: pygame.draw.rect(screen, Colours.LIGHT_RED, button_rect, 0, 8)
-    else: pygame.draw.rect(screen, Colours.RED, button_rect, 0, 8)
+    if button_hovered:
+        pygame.draw.rect(screen, Colours.LIGHT_RED, button_rect, 0, 8)
+    else:
+        pygame.draw.rect(screen, Colours.RED, button_rect, 0, 8)
     pygame.draw.rect(screen, Colours.BLACK, button_rect, 5, 8)
     screen.blit(txt, txt_rect)
 
@@ -71,40 +74,48 @@ def draw_game():
 
     human.draw_hand(screen)
 
-    txt = Fonts.title_font.render(str(len(bot1.hand)), True, Colours.WHITE)
-    txt_width, txt_height = Fonts.title_font.size(str(len(bot1.hand)))
+    txt = Fonts.TITLE_FONT.render(str(len(bot1.hand)), True, Colours.WHITE)
+    txt_width, txt_height = Fonts.TITLE_FONT.size(str(len(bot1.hand)))
     txt_rect = txt.get_rect(center=(WIDTH - txt_width, HEIGHT / 2))
     screen.blit(txt, txt_rect)
 
-    txt = Fonts.title_font.render(str(len(bot2.hand)), True, Colours.WHITE)
-    txt_width, txt_height = Fonts.title_font.size(str(len(bot2.hand)))
+    txt = Fonts.TITLE_FONT.render(str(len(bot2.hand)), True, Colours.WHITE)
+    txt_width, txt_height = Fonts.TITLE_FONT.size(str(len(bot2.hand)))
     txt_rect = txt.get_rect(center=(WIDTH / 2, txt_height))
     screen.blit(txt, txt_rect)
 
-    txt = Fonts.title_font.render(str(len(bot3.hand)), True, Colours.WHITE)
-    txt_width, txt_height = Fonts.title_font.size(str(len(bot3.hand)))
+    txt = Fonts.TITLE_FONT.render(str(len(bot3.hand)), True, Colours.WHITE)
+    txt_width, txt_height = Fonts.TITLE_FONT.size(str(len(bot3.hand)))
     txt_rect = txt.get_rect(center=(txt_width, HEIGHT / 2))
     screen.blit(txt, txt_rect)
-    
-    if turn == 0: circle_coords = (0, HEIGHT / 4)
-    if turn == 1: circle_coords = (WIDTH / 4, 0)
-    if turn == 2: circle_coords = (0, - HEIGHT / 4)
-    if turn == 3: circle_coords = (- WIDTH / 4, 0)
+
+    if turn == 0:
+        circle_coords = (0, HEIGHT / 4)
+    if turn == 1:
+        circle_coords = (WIDTH / 4, 0)
+    if turn == 2:
+        circle_coords = (0, - HEIGHT / 4)
+    if turn == 3:
+        circle_coords = (- WIDTH / 4, 0)
+
     pygame.draw.circle(screen, Colours.RED, (WIDTH / 2 + circle_coords[0], HEIGHT / 2 + circle_coords[1]), 5)
 
 
 def draw_gameover():
-    txt = Fonts.title_font.render("Game Over!", True, Colours.BLACK)
+    txt = Fonts.TITLE_FONT.render("Game Over!", True, Colours.BLACK)
     txt_rect = txt.get_rect(center=(WIDTH / 2, HEIGHT / 4))
     screen.blit(txt, txt_rect)
-    
-    txt = Fonts.title_font.render("Back to Title", True, Colours.BLACK)
+
+    txt = Fonts.TITLE_FONT.render("Back to Title", True, Colours.BLACK)
     txt_rect = txt.get_rect(center=(WIDTH / 2, HEIGHT - 100))
     button_rect = txt.get_rect(size=(300, 100), center=(WIDTH / 2, HEIGHT - 100))
-    if button_hovered: pygame.draw.rect(screen, Colours.LIGHT_RED, button_rect, 0, 8)
-    else: pygame.draw.rect(screen, Colours.RED, button_rect, 0, 8)
+    if button_hovered:
+        pygame.draw.rect(screen, Colours.LIGHT_RED, button_rect, 0, 8)
+    else:
+        pygame.draw.rect(screen, Colours.RED, button_rect, 0, 8)
     pygame.draw.rect(screen, Colours.BLACK, button_rect, 5, 8)
     screen.blit(txt, txt_rect)
+
 
 run = True
 game_state = 0
@@ -131,40 +142,39 @@ while run:
     mouse_pressed = pygame.mouse.get_pressed()
     mouse_pos = pygame.mouse.get_pos()
     players = (human, bot1, bot2, bot3)
-    
+
     if game_state == 0:
         draw_title()
     elif game_state == 1:
         draw_game()
     elif game_state == 2:
         draw_gameover()
-    
+
     for event in events:
         if event.type == pygame.QUIT:
             run = False
 
+    if timer > 0:
+        continue
+
     if game_state == 0:
         button_hovered = abs(WIDTH / 2 - mouse_pos[0]) < 100 and abs(HEIGHT - 100 - mouse_pos[1]) < 50
-        
-        if timer == 0:
-            if mouse_pressed[0] and button_hovered:
-                reshuffle()
-                human = HumanPlayer()
-                bot1 = BotPlayer()
-                bot2 = BotPlayer()
-                bot3 = BotPlayer()
-                for p in (human, bot1, bot2, bot3):
-                    for i in range(7):
-                        p.draw_card(deck)
-                game_state = 1
-                timer = 120
+        if mouse_pressed[0] and button_hovered:
+            reshuffle()
+            human = HumanPlayer()
+            bot1 = BotPlayer()
+            bot2 = BotPlayer()
+            bot3 = BotPlayer()
+            for player in human, bot1, bot2, bot3:
+                for i in range(7):
+                    player.draw_card(deck)
+            game_state = 1
+            timer = 30
 
     elif game_state == 1:
-        if len(deck) < 3: 
+        if len(deck) < 3:
             reshuffle()
 
-        if timer > 0: continue
-        
         if wild_picking:
             for i, colour in enumerate(("R", "B", "G", "Y")):
                 coords = WIDTH / 5 * (i + 1) - (Consts.CARD_WIDTH / 2), HEIGHT - (2 * Consts.CARD_HEIGHT) - 50
@@ -177,12 +187,19 @@ while run:
                     if mouse_pressed[0]:
                         discard[0].wild_change(colour)
                         wild_picking = False
-                        timer = 120
-        
+                        if discard[0].value == "D":
+                            turn += 1 * direction
+                            turn %= 4
+                            for _ in range(4):
+                                players[turn].draw_card(deck)
+                        turn += 1 * direction
+                        turn %= 4
+                        timer = 90
+
         elif turn == 0:
             if True not in map(valid, human.hand):
                 human.draw_card(deck)
-                timer = 45
+                timer = 30
             else:
                 bordered = False
                 for i, card in enumerate(reversed(human.hand)):
@@ -191,22 +208,24 @@ while run:
                         pygame.draw.rect(screen, Colours.BLACK, border, 3, 6)
                         bordered = True
                     if valid(card) and card.hovered(mouse_pos) and mouse_pressed[0]:
-                        if card.value == "R":
-                            direction = -direction
-                        if card.value == "S":
-                            turn += 1 * direction
-                        if card.value == "D":
-                            turn += 1 * direction
-                            turn %= 4
-                            for _ in range(4 if card.colour == "W" else 2):
-                                players[turn].draw_card(deck)
                         if card.colour == "W":
                             wild_picking = True
-                        turn += 1 * direction
-                        turn %= 4
+                        else:
+                            if card.value == "R":
+                                direction = -direction
+                            if card.value == "S":
+                                turn += 1 * direction
+                            if card.value == "D":
+                                turn += 1 * direction
+                                turn %= 4
+                                for _ in range(4 if card.colour == "W" else 2):
+                                    players[turn].draw_card(deck)
+                            turn += 1 * direction
+                            turn %= 4
+                            timer = 90
                         human.play_card(discard, -(i + 1))
-                        timer = 90
                         break
+
         else:
             bot = players[turn]
             if True not in map(valid, bot.hand):
@@ -232,18 +251,14 @@ while run:
                         timer = 90
                         break
 
-        for p in (human, bot1, bot2, bot3):
-            if len(p.hand) == 0:
-                winner = p
+        for player in players:
+            if len(player.hand) == 0:
+                winner = player
                 game_state = 2
-                timer = 120
-
+                timer = 30
 
     elif game_state == 2:
         button_hovered = abs(WIDTH / 2 - mouse_pos[0]) < 150 and abs(HEIGHT - 100 - mouse_pos[1]) < 50
-        
-        if timer == 0:
-            button_hovered = abs(WIDTH / 2 - mouse_pos[0]) < 150 and abs(HEIGHT - 100 - mouse_pos[1]) < 50
-            if button_hovered and mouse_pressed[0]:
-                game_state = 0
-                timer = 120
+        if button_hovered and mouse_pressed[0]:
+            game_state = 0
+            timer = 30

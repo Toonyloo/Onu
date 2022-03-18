@@ -16,7 +16,8 @@ class Player:
 
 class HumanPlayer(Player):
     def draw_hand(self, surf):
-        if len(self.hand) == 0: return
+        if len(self.hand) == 0:
+            return
         gap = min(20, Consts.WIDTH / len(self.hand) - Consts.CARD_WIDTH)
         hand_width = (Consts.CARD_WIDTH + gap) * (len(self.hand) - 1) + Consts.CARD_WIDTH
         left_pos = (Consts.WIDTH - hand_width) / 2
