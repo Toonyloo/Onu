@@ -4,10 +4,11 @@ pygame.init()
 
 
 class Card:
-    def __init__(self, colour, value):
+    def __init__(self, colour, value, wild=False):
         self.colour = colour
         self.value = value
-        self.surf = Images.CARDS[colour + value]
+        self.wild = wild
+        self.surf = Images.CARDS["W" * self.wild + colour + value]
         self.reveal = False
         self.x = 0
         self.y = 0

@@ -21,11 +21,11 @@ for colour in ("R", "B", "G", "Y"):
 
 for _ in range(4):
     for value in "W", "D":
-        discard.append(Card("W", value))
+        discard.append(Card("", value, True))
 
 
 def valid(card):
-    colour = card.colour == discard[0].colour or card.colour == "W"
+    colour = card.colour == discard[0].colour or card.wild
     value = card.value == discard[0].value
     return colour or value
 
@@ -34,7 +34,10 @@ def reshuffle():
     top = discard.pop(0)
     random.shuffle(discard)
     while (len(discard) > 0):
-        deck.append(discard.pop(0))
+        card = discard.pop(0)
+        if card.wild:
+            card.colour = ""
+        deck.append(card)
     discard.insert(0, top)
 
 
@@ -208,7 +211,7 @@ while run:
                         pygame.draw.rect(screen, Colours.BLACK, border, 3, 6)
                         bordered = True
                     if valid(card) and card.hovered(mouse_pos) and mouse_pressed[0]:
-                        if card.colour == "W":
+                        if card.wild:
                             wild_picking = True
                         else:
                             if card.value == "R":
@@ -218,7 +221,7 @@ while run:
                             if card.value == "D":
                                 turn += 1 * direction
                                 turn %= 4
-                                for _ in range(4 if card.colour == "W" else 2):
+                                for _ in range(4 if card.wild else 2):
                                     players[turn].draw_card(deck)
                             turn += 1 * direction
                             turn %= 4
@@ -241,9 +244,9 @@ while run:
                         if card.value == "D":
                             turn += 1 * direction
                             turn %= 4
-                            for _ in range(4 if card.colour == "W" else 2):
+                            for _ in range(4 if card.wild else 2):
                                 players[turn].draw_card(deck)
-                        if card.colour == "W":
+                        if card.wild:
                             card.wild_change(random.choice(("R", "B", "G", "Y")))
                         turn += 1 * direction
                         turn %= 4
