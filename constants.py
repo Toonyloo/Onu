@@ -1,4 +1,3 @@
-from turtle import back
 import pygame
 pygame.init()
 
@@ -33,11 +32,10 @@ class Images:
             CARD = pygame.image.load(f"assets/images/cards/{colour}{value}.png").convert_alpha()
             CARDS[colour + value] = pygame.transform.scale(CARD, (Consts.CARD_WIDTH, Consts.CARD_HEIGHT))
 
-    CARD = pygame.image.load(f"assets/images/cards/WW.png").convert_alpha()
-    CARDS["WW"] = pygame.transform.scale(CARD, (Consts.CARD_WIDTH, Consts.CARD_HEIGHT))
-
-    CARD = pygame.image.load(f"assets/images/cards/WD.png").convert_alpha()
-    CARDS["WD"] = pygame.transform.scale(CARD, (Consts.CARD_WIDTH, Consts.CARD_HEIGHT))
+    for value in "W", "D":
+        for colour in "", "R", "B", "G", "Y":
+            CARD = pygame.image.load(f"assets/images/cards/W{value}{colour}.png").convert_alpha()
+            CARDS["W" + value + colour] = pygame.transform.scale(CARD, (Consts.CARD_WIDTH, Consts.CARD_HEIGHT))
 
 
 class Fonts:

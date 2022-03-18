@@ -19,3 +19,7 @@ class Card:
         x_hovered = self.x <= mouse_pos[0] <= self.x + Consts.CARD_WIDTH
         y_hovered = self.y <= mouse_pos[1] <= self.y + Consts.CARD_HEIGHT
         return x_hovered and y_hovered
+
+    def wild_change(self, new_colour):
+        self.colour = new_colour
+        self.surf = Images.CARDS["W" + self.value + self.colour]

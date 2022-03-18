@@ -19,9 +19,12 @@ for colour in ("R", "B", "G", "Y"):
         for value in list(map(str, range(1, 10))) + ["R", "D", "S"]:
             discard.append(Card(colour, value))
 
+for _ in range(4):
+    for value in "W", "D":
+        discard.append(Card("W", value))
 
 def valid(card):
-    colour = card.colour == discard[0].colour
+    colour = card.colour == discard[0].colour or card.colour == "W"
     value = card.value == discard[0].value
     return colour or value 
 
@@ -105,6 +108,7 @@ def draw_gameover():
 
 run = True
 game_state = 0
+wild_picking = False
 turn = 0
 timer = 0
 winner = None
@@ -127,15 +131,22 @@ while run:
     mouse_pressed = pygame.mouse.get_pressed()
     mouse_pos = pygame.mouse.get_pos()
     players = (human, bot1, bot2, bot3)
+    
+    if game_state == 0:
+        draw_title()
+    elif game_state == 1:
+        draw_game()
+    elif game_state == 2:
+        draw_gameover()
+    
     for event in events:
         if event.type == pygame.QUIT:
             run = False
 
     if game_state == 0:
-        draw_title()
+        button_hovered = abs(WIDTH / 2 - mouse_pos[0]) < 100 and abs(HEIGHT - 100 - mouse_pos[1]) < 50
         
         if timer == 0:
-            button_hovered = abs(WIDTH / 2 - mouse_pos[0]) < 100 and abs(HEIGHT - 100 - mouse_pos[1]) < 50
             if mouse_pressed[0] and button_hovered:
                 reshuffle()
                 human = HumanPlayer()
@@ -149,59 +160,77 @@ while run:
                 timer = 120
 
     elif game_state == 1:
-        draw_game()
         if len(deck) < 3: 
             reshuffle()
 
-        if timer == 0:
-            if turn == 0:
-                if True not in map(valid, human.hand):
-                    human.draw_card(deck)
-                    timer = 45
-                else:
-                    bordered = False
-                    for i, card in enumerate(reversed(human.hand)):
-                        if card.hovered(mouse_pos) and not bordered:
-                            border = pygame.Rect(card.x, card.y, Consts.CARD_WIDTH, Consts.CARD_HEIGHT)
-                            pygame.draw.rect(screen, Colours.BLACK, border, 3, 6)
-                            bordered = True
-                        if valid(card) and card.hovered(mouse_pos) and mouse_pressed[0]:
-                            if card.value == "R":
-                                direction = -direction
-                            if card.value == "S":
-                                turn += 1 * direction
-                            if card.value == "D":
-                                turn += 1 * direction
-                                turn %= 4
-                                for _ in range(2):
-                                    players[turn].draw_card(deck)
-                            turn += 1 * direction
-                            turn %= 4
-                            human.play_card(discard, -(i + 1))
-                            timer = 90
-                            break
+        if timer > 0: continue
+        
+        if wild_picking:
+            for i, colour in enumerate(("R", "B", "G", "Y")):
+                coords = WIDTH / 5 * (i + 1) - (Consts.CARD_WIDTH / 2), HEIGHT - (2 * Consts.CARD_HEIGHT) - 50
+                screen.blit(Images.CARDS["W" + discard[0].value + colour], coords)
+                x_hovered = coords[0] < mouse_pos[0] < coords[0] + Consts.CARD_WIDTH
+                y_hovered = coords[1] < mouse_pos[1] < coords[1] + Consts.CARD_HEIGHT
+                if x_hovered and y_hovered:
+                    border = pygame.Rect(coords[0], coords[1], Consts.CARD_WIDTH, Consts.CARD_HEIGHT)
+                    pygame.draw.rect(screen, Colours.BLACK, border, 3, 6)
+                    if mouse_pressed[0]:
+                        discard[0].wild_change(colour)
+                        wild_picking = False
+                        timer = 120
+        
+        elif turn == 0:
+            if True not in map(valid, human.hand):
+                human.draw_card(deck)
+                timer = 45
             else:
-                bot = players[turn]
-                if True not in map(valid, bot.hand):
-                    bot.draw_card(deck)
-                    timer = 30
-                else:
-                    for i, card in enumerate(bot.hand):
-                        if valid(card):
-                            if card.value == "R":
-                                direction = -direction
-                            if card.value == "S":
-                                turn += 1 * direction
-                            if card.value == "D":
-                                turn += 1 * direction
-                                turn %= 4
-                                for _ in range(2):
-                                    players[turn].draw_card(deck)
+                bordered = False
+                for i, card in enumerate(reversed(human.hand)):
+                    if card.hovered(mouse_pos) and not bordered and valid(card):
+                        border = pygame.Rect(card.x, card.y, Consts.CARD_WIDTH, Consts.CARD_HEIGHT)
+                        pygame.draw.rect(screen, Colours.BLACK, border, 3, 6)
+                        bordered = True
+                    if valid(card) and card.hovered(mouse_pos) and mouse_pressed[0]:
+                        if card.value == "R":
+                            direction = -direction
+                        if card.value == "S":
+                            turn += 1 * direction
+                        if card.value == "D":
                             turn += 1 * direction
                             turn %= 4
-                            bot.play_card(discard, i)
-                            timer = 90
-                            break
+                            for _ in range(4 if card.colour == "W" else 2):
+                                players[turn].draw_card(deck)
+                        if card.colour == "W":
+                            wild_picking = True
+                        turn += 1 * direction
+                        turn %= 4
+                        human.play_card(discard, -(i + 1))
+                        timer = 90
+                        break
+        else:
+            bot = players[turn]
+            if True not in map(valid, bot.hand):
+                bot.draw_card(deck)
+                timer = 30
+            else:
+                for i, card in enumerate(bot.hand):
+                    if valid(card):
+                        if card.value == "R":
+                            direction = -direction
+                        if card.value == "S":
+                            turn += 1 * direction
+                        if card.value == "D":
+                            turn += 1 * direction
+                            turn %= 4
+                            for _ in range(4 if card.colour == "W" else 2):
+                                players[turn].draw_card(deck)
+                        if card.colour == "W":
+                            card.wild_change(random.choice(("R", "B", "G", "Y")))
+                        turn += 1 * direction
+                        turn %= 4
+                        bot.play_card(discard, i)
+                        timer = 90
+                        break
 
         for p in (human, bot1, bot2, bot3):
             if len(p.hand) == 0:
@@ -212,7 +241,6 @@ while run:
 
     elif game_state == 2:
         button_hovered = abs(WIDTH / 2 - mouse_pos[0]) < 150 and abs(HEIGHT - 100 - mouse_pos[1]) < 50
-        draw_gameover()
         
         if timer == 0:
             button_hovered = abs(WIDTH / 2 - mouse_pos[0]) < 150 and abs(HEIGHT - 100 - mouse_pos[1]) < 50
